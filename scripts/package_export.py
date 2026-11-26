@@ -6,10 +6,17 @@ from __future__ import annotations
 import argparse
 import json
 import shutil
+import sys
 import textwrap
 from pathlib import Path
 
-from PIL import Image, ImageDraw, ImageEnhance, ImageFont
+from PIL import Image, ImageDraw, ImageEnhance
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.doc_graphics import load_font
 
 
 def format_timestamp(seconds: float) -> str:
@@ -30,17 +37,6 @@ def build_chapter_lines(audio_timeline: dict) -> list[str]:
     return lines
 
 
-def _load_font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
-    for candidate in (
-        "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
-        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
-        "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
-    ):
-        if Path(candidate).exists():
-            return ImageFont.truetype(candidate, size=size)
-    return ImageFont.load_default()
-
-
 def render_thumbnail(base_image_path: Path, output_png_path: Path, *, headline: str) -> Path:
     """Compose a clean 1280x720 thumbnail with a bottom scrim and high-contrast typography."""
     thumb_w, thumb_h = 1280, 720
@@ -58,7 +54,7 @@ def render_thumbnail(base_image_path: Path, output_png_path: Path, *, headline: 
     composed = Image.alpha_composite(img.convert("RGBA"), overlay)
     draw = ImageDraw.Draw(composed)
 
-    font = _load_font(66)
+    font = load_font(66, style="serif_bold")
     wrapped = textwrap.wrap(headline.strip(), width=24)[:3]
     y_cursor = thumb_h - 80 - (len(wrapped) * 78)
     for line in wrapped:
@@ -93,11 +89,19 @@ def run(run_dir: Path, *, thumbnail_scene: str | None = None) -> dict:
 
     # 2) Pick scene image and compose 1280x720 thumbnail.png
     scenes = plan.get("scenes", [])
+    preferred_id = thumbnail_scene or metadata.get("thumbnail_scene")
     chosen_scene = None
-    if thumbnail_scene:
-        chosen_scene = next((s for s in scenes if s.get("scene_id") == thumbnail_scene), None)
-    if chosen_scene is None and scenes:
-        chosen_scene = scenes[0]
+    if preferred_id:
+        chosen_scene = next((s for s in scenes if s.get("scene_id") == preferred_id), None)
+    if chosen_scene is None:
+        chosen_scene = next(
+            (
+                s
+                for s in scenes
+                if (run_root / (s.get("image_file") or f"04_visuals/{s['scene_id']}.png")).exists()
+            ),
+            scenes[0] if scenes else None,
+        )
     if chosen_scene is None:
         raise ValueError("Cannot generate thumbnail: no scenes in visual_plan.json")
 
