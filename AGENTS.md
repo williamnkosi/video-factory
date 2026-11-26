@@ -1,7 +1,7 @@
 # Video Factory — Antigravity Agent Instructions
 
 An **Antigravity-native AI video factory** for producing **15–30 minute videos** from a short description.
-*(Channel niche, tone, and visual style are intentionally left generic and configurable via `.agents/rules/style-bible.md`.)*
+*(Channel niche, tone, and visual style are isolated and configured in `.agents/rules/style-bible.md`.)*
 
 ## Architecture Overview (3 Agents + 4 Scripts)
 
@@ -11,7 +11,7 @@ Deterministic media work (TTS, image generation, video rendering, packaging) is 
 | Layer | Location | Responsibility |
 | :--- | :--- | :--- |
 | **Orchestrator Skill** | `.agents/skills/video-factory/SKILL.md` | End-to-end stage-gated workflow & human review checkpoints |
-| **Channel Style Rules** | `.agents/rules/style-bible.md` | Runtime targets, voice/writing guardrails, and visual direction (TBD) |
+| **Channel Style Rules** | `.agents/rules/style-bible.md` | Runtime targets, voice/writing guardrails, visual style, and audio rules |
 | **Agent 1: Researcher** | `agents/01-researcher.md` | Topic research & section/chapter outline (`01_outline.json`) |
 | **Agent 2: Scriptwriter** | `agents/02-scriptwriter.md` | Long-form script drafting & continuity edit (`02_script/chapter_XX.md`) |
 | **Agent 3: Art Director** | `agents/03-art-director.md` | Visual scene planning & export metadata (`04_visuals/`, `06_export/`) |
