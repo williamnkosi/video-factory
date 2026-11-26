@@ -8,7 +8,7 @@ import pytest
 from PIL import Image
 
 from providers.base import chunk_text_for_tts
-from providers.registry import get_image_provider, get_tts_provider
+from providers.registry import get_image_provider, get_tts_provider, get_video_provider
 from scripts.package_export import format_timestamp
 from scripts.tts_and_master import normalize_text_for_speech, parse_chapter_markdown
 
@@ -29,12 +29,26 @@ def test_registry_resolves_mock_providers(tmp_path: Path):
     with Image.open(png_out) as pil_img:
         assert pil_img.size == (640, 360)
 
+    vid = get_video_provider("mock")
+    mp4_out = vid.generate_video(
+        prompt="Slow sunrise over highland stone walls",
+        output_mp4_path=tmp_path / "hero.mp4",
+        image_path=png_out,
+        duration_seconds=2,
+        width=640,
+        height=360,
+        fps=12,
+    )
+    assert mp4_out.is_file() and mp4_out.stat().st_size > 2000
+
 
 def test_registry_rejects_unknown_provider():
     with pytest.raises(ValueError, match="Unknown TTS provider"):
         get_tts_provider("nonexistent")
     with pytest.raises(ValueError, match="Unknown image provider"):
         get_image_provider("nonexistent")
+    with pytest.raises(ValueError, match="Unknown video provider"):
+        get_video_provider("nonexistent")
 
 
 def test_gemini_requires_api_key(monkeypatch: pytest.MonkeyPatch):
@@ -44,6 +58,8 @@ def test_gemini_requires_api_key(monkeypatch: pytest.MonkeyPatch):
         get_tts_provider("gemini")
     with pytest.raises(ValueError, match="GEMINI_API_KEY"):
         get_image_provider("gemini")
+    with pytest.raises(ValueError, match="GEMINI_API_KEY"):
+        get_video_provider("veo")
 
 
 def test_extract_image_bytes_from_generate_content():

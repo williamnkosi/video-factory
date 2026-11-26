@@ -8,7 +8,11 @@ Every creative choice (outline, script, TTS delivery, visual prompts, and export
 - **Channel Format:** Narrative historical documentary / deep-dive explainer (curious, cinematic, rigorous, engaging).
 - **Target Duration:** **15–30 minutes** (default: **20 minutes**).
 - **Target Spoken Pace:** **~135–150 words per minute** (~2,200–4,500 words total across **4–6 chapters**; aim for **~2,800–3,000 words** for a 20-minute default).
-- **Visual Cadence:** **1 scene every 40–50 seconds** (~24–30 scenes for a 20-minute video).
+- **Visual Cadence (Hybrid Documentary):** **1 visual change every 15–25 seconds** (~50–75 scenes for a 20-minute video), blending three scene types:
+  1. **Hero Animated Clips (`media_type: "video"`):** Opening hook + chapter establishing shots animated via Image-to-Video (`veo` or `mock`) from their vintage editorial illustration.
+  2. **Animated Cartographic Maps (`media_type: "map"`):** Programmatic vintage parchment trade, migration, and regional maps whenever narration traces geography or routes.
+  3. **Editorial Illustration Plates (`media_type: "image"`):** Crisp 16:9 vintage editorial prints with Ken Burns motion, subtle archival grain, and warm vignette.
+- **Documentary Overlays:** Every chapter opens with a subtle translucent `chapter_card` overlay, and key places/eras display crisp bottom-left `callout` lower-third badges (`location`, `era`, `caption`).
 
 ## 2. Editorial Lens & Historical Rigor
 - **Inside-Out Perspective:** Tell African history on its own terms — centering African agency, institutions, trade, politics, and voices rather than framing eras solely around European arrival or outside "discovery."

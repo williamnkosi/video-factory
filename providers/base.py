@@ -1,4 +1,4 @@
-"""Abstract interfaces for pluggable TTS and Image providers."""
+"""Abstract interfaces for pluggable TTS, Image, and Video providers."""
 
 from __future__ import annotations
 
@@ -35,6 +35,24 @@ class ImageProvider(ABC):
         height: int = 1080,
     ) -> Path:
         """Generate a 16:9 image and save it as PNG at output_png_path."""
+
+
+class VideoProvider(ABC):
+    """Interface for 16:9 hero video clip generation (image-to-video or text-to-video)."""
+
+    @abstractmethod
+    def generate_video(
+        self,
+        *,
+        prompt: str,
+        output_mp4_path: Path,
+        image_path: Path | None = None,
+        duration_seconds: int = 8,
+        width: int = 1920,
+        height: int = 1080,
+        fps: int = 24,
+    ) -> Path:
+        """Generate a 16:9 video clip and save it as MP4 at output_mp4_path."""
 
 
 def chunk_text_for_tts(text: str, max_chars: int = 2400) -> list[str]:

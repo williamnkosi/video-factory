@@ -27,7 +27,12 @@ Own two creative stages of the pipeline while obeying `.agents/rules/style-bible
 2. If `04_visuals/visual_plan.json` already exists and the user asks to revise specific scenes, preserve all untouched scenes and their `image_file` fields.
 3. **Sync scene count & durations to real audio:**
    - Use `audio_timeline.json`'s exact `total_duration_seconds` and per-chapter `start_seconds` / `end_seconds` (including intro silence, chapter pauses, and outro silence).
-   - Divide each chapter into scenes targeting **40–50 seconds each** per `.agents/rules/style-bible.md` (for short dry-runs under 2 minutes, scale down proportionally so every chapter has at least 2 scenes and no scene is under 4 seconds).
+   - Divide each chapter into hybrid visual beats targeting **15–25 seconds each** per `.agents/rules/style-bible.md` (for short pilots under 4 minutes, aim for 2–3 distinct visual beats per chapter).
+   - Mix `media_type` intentionally:
+     - `"video"` for the opening hook and chapter-opener hero establishing shots (include both `image_prompt` for the starting plate and `motion_prompt` describing subtle atmospheric animation).
+     - `"map"` whenever the narration traces geography, empires, migrations, or trade corridors (include a `map` object with `title`, `subtitle`, optional `bbox`, and `stops`: `[{name, lon, lat, note, label_offset}]`).
+     - `"image"` for rich illustrated plates between hero shots and maps.
+   - Add a `chapter_card` object (`chapter_number`, `title`, optional `subtitle`) on the first scene of each chapter, and `callout` lower-thirds (`location`, `era`, `caption`) whenever a new place, kingdom, or historical date enters the narrative.
    - Scene timing MUST be contiguous with zero gaps or overlaps:
      - `scene_001.start_seconds = 0.0`
      - Each subsequent `start_seconds = previous.start_seconds + previous.duration_seconds`
@@ -45,16 +50,47 @@ Own two creative stages of the pipeline while obeying `.agents/rules/style-bible
     {
       "scene_id": "scene_001",
       "chapter_number": 1,
+      "media_type": "video",
       "start_seconds": 0.0,
-      "duration_seconds": 45.0,
+      "duration_seconds": 20.0,
       "motion": "zoom_in",
-      "narrative_beat": "Short note on what narration line this frame accompanies",
-      "image_prompt": "Full self-contained 16:9 editorial illustration prompt including the shared visual style and explicit no-text constraint."
+      "narrative_beat": "Opening hero shot inside the stone city",
+      "chapter_card": {
+        "chapter_number": 1,
+        "title": "Granite Without Mortar",
+        "subtitle": "Southern Zambezian Plateau · c. 1250–1450 CE"
+      },
+      "callout": {
+        "location": "Great Zimbabwe",
+        "era": "c. 1250 – 1450 CE",
+        "caption": "The Great Enclosure · 11m Dry-Stone Walls"
+      },
+      "image_prompt": "Full self-contained 16:9 editorial illustration prompt including the shared visual style and explicit no-text constraint.",
+      "motion_prompt": "Subtle documentary motion: morning light warming granite courses, gentle clouds drifting overhead, slow smooth push forward."
+    },
+    {
+      "scene_id": "scene_002",
+      "chapter_number": 3,
+      "media_type": "map",
+      "start_seconds": 20.0,
+      "duration_seconds": 22.0,
+      "motion": "static",
+      "narrative_beat": "Animated gold trade route from inland plateau to the Swahili coast",
+      "map": {
+        "title": "The Indian Ocean Gold Corridor",
+        "subtitle": "c. 1250 – 1450 CE",
+        "bbox": [24.0, -27.5, 48.0, -5.0],
+        "stops": [
+          {"name": "Great Zimbabwe", "lon": 30.93, "lat": -20.27, "note": "Highland Capital"},
+          {"name": "Sofala", "lon": 34.73, "lat": -20.15, "note": "Coastal Gold Port"},
+          {"name": "Kilwa Kisiwani", "lon": 39.51, "lat": -8.96, "note": "Swahili Sultanate"}
+        ]
+      }
     }
   ]
 }
 ```
-*(Note: `scripts/generate_images.py` reads `scene_id` and `image_prompt` and populates `image_file`; `scripts/render_video.py` reads `scene_id`, `duration_seconds`, `motion`, and `image_file`.)*
+*(Note: `scripts/generate_images.py` generates `image_file` for `"image"` and `"video"` scenes, plus `video_file` for `"video"` scenes when `--video-provider` is set; `scripts/render_video.py` renders `"map"` clips, `"video"` clips, `"image"` plates, and composites `chapter_card` / `callout` overlays.)*
 
 ---
 
