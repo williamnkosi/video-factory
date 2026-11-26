@@ -55,27 +55,62 @@ def test_four_scripts_end_to_end(tmp_path: Path):
     assert len(timeline["chapters"]) == 2
     assert timeline["total_duration_seconds"] > 4.0
 
-    # Agent 3 visual_plan.json + metadata.json
-    half = timeline["total_duration_seconds"] / 2.0
+    # Agent 3 hybrid visual_plan.json (video hero + animated map + image plate + overlays)
+    third = timeline["total_duration_seconds"] / 3.0
     (run_dir / "04_visuals" / "visual_plan.json").write_text(
         json.dumps(
             {
-                "style_bible": "Clean 16:9 widescreen cinematography",
+                "style_bible": "Minimalist muted vintage editorial illustration, no text",
                 "scenes": [
                     {
                         "scene_id": "scene_001",
                         "chapter_number": 1,
+                        "media_type": "video",
+                        "video_duration_seconds": 2,
                         "start_seconds": 0.0,
-                        "duration_seconds": half,
+                        "duration_seconds": third,
                         "motion": "zoom_in",
+                        "chapter_card": {
+                            "chapter_number": 1,
+                            "title": "Opening Beat",
+                            "subtitle": "Southern Plateau · c. 1300 CE",
+                        },
+                        "callout": {
+                            "location": "Great Zimbabwe",
+                            "era": "c. 1250 – 1450 CE",
+                        },
                         "image_prompt": "Wide 16:9 sunrise over hills, no text",
+                        "motion_prompt": "Warm morning light drifting across stone ridges",
                     },
                     {
                         "scene_id": "scene_002",
+                        "chapter_number": 1,
+                        "media_type": "map",
+                        "start_seconds": third,
+                        "duration_seconds": third,
+                        "motion": "static",
+                        "map": {
+                            "title": "Gold Trade Corridor",
+                            "subtitle": "c. 1250 – 1450 CE",
+                            "stops": [
+                                {"name": "Great Zimbabwe", "lon": 30.93, "lat": -20.27},
+                                {"name": "Sofala", "lon": 34.73, "lat": -20.15},
+                                {"name": "Kilwa Kisiwani", "lon": 39.51, "lat": -8.96},
+                            ],
+                        },
+                    },
+                    {
+                        "scene_id": "scene_003",
                         "chapter_number": 2,
-                        "start_seconds": half,
-                        "duration_seconds": half,
+                        "media_type": "image",
+                        "start_seconds": third * 2.0,
+                        "duration_seconds": third,
                         "motion": "pan_right",
+                        "callout": {
+                            "location": "Kilwa Kisiwani",
+                            "era": "14th Century",
+                            "caption": "Swahili Maritime Hub",
+                        },
                         "image_prompt": "Wide 16:9 dusk over harbor, no text",
                     },
                 ],
@@ -88,6 +123,7 @@ def test_four_scripts_end_to_end(tmp_path: Path):
             {
                 "selected_title": "Demo Video Title",
                 "thumbnail_text": "DEMO VIDEO",
+                "thumbnail_scene": "scene_001",
                 "description_intro": "A clean end-to-end test description.",
                 "tags": ["demo", "video"],
             }
@@ -95,13 +131,15 @@ def test_four_scripts_end_to_end(tmp_path: Path):
         encoding="utf-8",
     )
 
-    # Script 2: Image generation (+ verify single-scene regeneration works)
+    # Script 2: Image + Hero Video generation (+ verify single-scene regeneration works)
     subprocess.run(
         [
             sys.executable,
             str(REPO_ROOT / "scripts" / "generate_images.py"),
             str(run_dir),
             "--provider",
+            "mock",
+            "--video-provider",
             "mock",
             "--width",
             "640",
@@ -118,7 +156,7 @@ def test_four_scripts_end_to_end(tmp_path: Path):
             "--provider",
             "mock",
             "--scene",
-            "scene_001",
+            "scene_003",
             "--width",
             "640",
             "--height",
@@ -127,7 +165,8 @@ def test_four_scripts_end_to_end(tmp_path: Path):
         check=True,
     )
     assert (run_dir / "04_visuals" / "scene_001.png").is_file()
-    assert (run_dir / "04_visuals" / "scene_002.png").is_file()
+    assert (run_dir / "04_visuals" / "scene_001.mp4").is_file()
+    assert (run_dir / "04_visuals" / "scene_003.png").is_file()
 
     # Script 3: Render MP4
     subprocess.run(

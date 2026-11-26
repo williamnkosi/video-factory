@@ -50,13 +50,15 @@ When executing a stage, read the corresponding spec file and `.agents/rules/styl
   *(Swap `--ambience soft_rain` when thematically fitting, or `--ambience none` if the user wants narration only; use `--chapter N` for single-chapter regeneration.)*
 - Produces `03_audio/narration_master.wav` and `03_audio/audio_timeline.json`.
 
-### 4. Stage 4 — Visual Planning & Image Generation (`agents/03-art-director.md` + `scripts/generate_images.py`)
-- Run the Art Director (Stage 4 procedure) using `03_audio/audio_timeline.json` to write `runs/<slug>/04_visuals/visual_plan.json`.
-- Generate all 16:9 scene PNGs:
+### 4. Stage 4 — Visual Planning & Media Generation (`agents/03-art-director.md` + `scripts/generate_images.py`)
+- Run the Art Director (Stage 4 procedure) using `03_audio/audio_timeline.json` to write a hybrid `runs/<slug>/04_visuals/visual_plan.json` (mixing `video` hero shots, animated `map` routes, `image` editorial plates, `chapter_card` intros, and `callout` lower-thirds).
+- Generate all 16:9 scene PNGs and hero MP4 clips:
   ```bash
-  .venv/bin/python scripts/generate_images.py runs/<slug> --provider <gemini|mock>
+  .venv/bin/python scripts/generate_images.py runs/<slug> \
+    --provider <gemini|mock> \
+    --video-provider <veo|mock|none>
   ```
-- **Checkpoint 3:** Present the scene list and let the user inspect frames or surgically regenerate individual scenes (`--scene scene_XXX`) after tweaking prompts in `visual_plan.json`.
+- **Checkpoint 3:** Present the scene list and let the user inspect frames/clips or surgically regenerate individual scenes (`--scene scene_XXX`) after tweaking prompts in `visual_plan.json`.
 
 ### 5. Stage 5 — Video Render (`scripts/render_video.py`)
 - Assemble Ken Burns clips, hierarchical crossfades, and H.264/AAC muxing:
