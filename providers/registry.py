@@ -1,4 +1,4 @@
-"""Provider registry resolving concrete TTS and Image adapters by name."""
+"""Provider registry resolving concrete TTS, Image, and Video adapters by name."""
 
 from __future__ import annotations
 
@@ -6,14 +6,17 @@ import os
 
 from dotenv import load_dotenv
 
-from providers.base import ImageProvider, TTSProvider
+from providers.base import ImageProvider, TTSProvider, VideoProvider
 from providers.image.gemini import GeminiImageProvider
 from providers.image.mock import MockImageProvider
 from providers.tts.gemini import GeminiTTSProvider
 from providers.tts.mock import MockTTSProvider
+from providers.video.mock import MockVideoProvider
+from providers.video.veo import VeoVideoProvider
 
 TTS_PROVIDERS: tuple[str, ...] = ("gemini", "mock")
 IMAGE_PROVIDERS: tuple[str, ...] = ("gemini", "mock")
+VIDEO_PROVIDERS: tuple[str, ...] = ("veo", "mock")
 
 
 def get_tts_provider(
@@ -59,4 +62,26 @@ def get_image_provider(
 
     raise ValueError(
         f"Unknown image provider '{provider_name}'. Supported providers: {', '.join(IMAGE_PROVIDERS)}"
+    )
+
+
+def get_video_provider(
+    name: str | None = None,
+    *,
+    model: str | None = None,
+) -> VideoProvider:
+    """Resolve a concrete VideoProvider by name (or VF_VIDEO_PROVIDER env var)."""
+    load_dotenv()
+    provider_name = (name or os.getenv("VF_VIDEO_PROVIDER") or "veo").strip().lower()
+
+    if provider_name == "veo":
+        return VeoVideoProvider(
+            api_key=os.getenv("GEMINI_API_KEY", ""),
+            model=model or os.getenv("VF_GEMINI_VIDEO_MODEL", "veo-3.0-generate-001"),
+        )
+    if provider_name == "mock":
+        return MockVideoProvider()
+
+    raise ValueError(
+        f"Unknown video provider '{provider_name}'. Supported providers: {', '.join(VIDEO_PROVIDERS)}"
     )
