@@ -1,10 +1,20 @@
-# Media Scripts (Skeleton)
+# Media Scripts
 
-Deterministic Python scripts invoked by Antigravity after creative stages complete.
-*(To be implemented once the agent skeleton is finalized.)*
+Deterministic Python CLI scripts invoked after creative stages complete.
 
-Planned scripts (4 total):
-1. `tts_and_master.py` — Synthesizes chapter narration via `providers/`, normalizes/masters audio, and writes `03_audio/audio_timeline.json`.
-2. `generate_images.py` — Generates 16:9 scene PNGs from `04_visuals/visual_plan.json` (with single-scene regeneration support).
-3. `render_video.py` — Deterministic FFmpeg video assembly from scene images + mastered audio (`05_render/final_video.mp4`).
-4. `package_export.py` — Renders thumbnail, builds chapter timestamps, and assembles the final upload bundle (`06_export/`).
+1. `tts_and_master.py` — Synthesizes `02_script/chapter_*.md` via `providers.registry.get_tts_provider`, masters to `-16 LUFS`, and writes `03_audio/narration_master.wav` + `audio_timeline.json`.
+   ```bash
+   python scripts/tts_and_master.py runs/<slug> --provider mock
+   ```
+2. `generate_images.py` — Generates 16:9 scene PNGs from `04_visuals/visual_plan.json` via `providers.registry.get_image_provider` (supports `--scene scene_004` for single-frame regen).
+   ```bash
+   python scripts/generate_images.py runs/<slug> --provider mock
+   ```
+3. `render_video.py` — Deterministic FFmpeg compositor (Ken Burns motion, hierarchical crossfades, optional dimming, H.264 + AAC muxing) writing `05_render/final_video.mp4`.
+   ```bash
+   python scripts/render_video.py runs/<slug>
+   ```
+4. `package_export.py` — Composes 1280×720 `thumbnail.png`, builds `00:00` chapter markers, writes `description.txt`, and finalizes `06_export/`.
+   ```bash
+   python scripts/package_export.py runs/<slug>
+   ```

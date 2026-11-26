@@ -15,8 +15,8 @@ Deterministic media work (TTS, image generation, video rendering, packaging) is 
 | **Agent 1: Researcher** | `agents/01-researcher.md` | Topic research & section/chapter outline (`01_outline.json`) |
 | **Agent 2: Scriptwriter** | `agents/02-scriptwriter.md` | Long-form script drafting & continuity edit (`02_script/chapter_XX.md`) |
 | **Agent 3: Art Director** | `agents/03-art-director.md` | Visual scene planning & export metadata (`04_visuals/`, `06_export/`) |
-| **Media Scripts (TODO)** | `scripts/` | `tts_and_master.py`, `generate_images.py`, `render_video.py`, `package_export.py` |
-| **Shared Providers (TODO)** | `providers/` | Pluggable TTS & Image API adapters |
+| **Media Scripts** | `scripts/` | `tts_and_master.py`, `generate_images.py`, `render_video.py`, `package_export.py` |
+| **Shared Providers** | `providers/` | Pluggable `TTSProvider` & `ImageProvider` adapters (`gemini`, `mock`) |
 
 ## Shared Run Artifact Contract (`runs/<slug>/`)
 

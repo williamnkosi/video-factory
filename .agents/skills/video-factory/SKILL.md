@@ -3,7 +3,7 @@ name: video-factory
 description: Orchestrates the 3-agent, 4-script stage-gated pipeline that turns a short topic description into a 15-30 minute video export bundle.
 ---
 
-# Video Factory Orchestrator (Skeleton)
+# Video Factory Orchestrator
 
 Follow this stage-gated sequence whenever the user asks to produce a new 15–30 minute video from a description.
 
@@ -20,14 +20,16 @@ Follow this stage-gated sequence whenever the user asks to produce a new 15–30
    - Invoke the Scriptwriter agent to draft and edit `runs/<slug>/02_script/chapter_01..XX.md`.
    - **Checkpoint:** Let the user review or edit chapter Markdown files directly.
 
-4. **Stage 3 — Audio & Mastering (`scripts/tts_and_master.py`)** *(TODO: implement)*
-   - Synthesize chapter narration, master audio, and output `03_audio/narration_master.wav` + `03_audio/audio_timeline.json`.
+4. **Stage 3 — Audio & Mastering (`scripts/tts_and_master.py`)**
+   - Run: `python scripts/tts_and_master.py runs/<slug> [--provider gemini|mock]`
+   - Produces `03_audio/narration_master.wav` and `03_audio/audio_timeline.json`.
 
 5. **Stage 4 — Visual Planning & Image Generation (`agents/03-art-director.md` + `scripts/generate_images.py`)**
    - Invoke the Art Director agent to write `04_visuals/visual_plan.json` synced to `audio_timeline.json`.
-   - Run `scripts/generate_images.py` to generate 16:9 scene PNGs.
+   - Run: `python scripts/generate_images.py runs/<slug> [--provider gemini|mock]`
    - **Checkpoint:** Allow surgical regeneration of any individual scene (`--scene scene_XXX`).
 
-6. **Stage 5 & 6 — Render & Export (`scripts/render_video.py` + `scripts/package_export.py`)** *(TODO: implement)*
-   - Render `05_render/final_video.mp4`.
-   - Draft title/description/tags via Art Director agent and run `scripts/package_export.py` to assemble `06_export/`.
+6. **Stage 5 & 6 — Render & Export (`scripts/render_video.py` + `scripts/package_export.py`)**
+   - Run: `python scripts/render_video.py runs/<slug>`
+   - Draft title/description/tags via Art Director agent (`06_export/metadata.json`).
+   - Run: `python scripts/package_export.py runs/<slug>` to finalize `06_export/` (`video.mp4`, `thumbnail.png`, `description.txt`, `metadata.json`).
