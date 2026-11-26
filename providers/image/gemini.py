@@ -1,4 +1,4 @@
-"""Google Gemini Imagen provider (16:9 PNG)."""
+"""Google Gemini native image generation provider (16:9 PNG)."""
 
 from __future__ import annotations
 
@@ -11,12 +11,12 @@ from providers.base import ImageProvider
 
 
 class GeminiImageProvider(ImageProvider):
-    """Generates 16:9 scene frames using Google GenAI Imagen."""
+    """Generates 16:9 scene frames using Google GenAI native image generation."""
 
     def __init__(
         self,
         api_key: str,
-        model: str = "imagen-3.0-generate-002",
+        model: str = "gemini-2.5-flash-image",
     ) -> None:
         if not api_key:
             raise ValueError(
@@ -37,21 +37,30 @@ class GeminiImageProvider(ImageProvider):
     ) -> Path:
         from google.genai import types
 
-        result = self.client.models.generate_images(
+        response = self.client.models.generate_content(
             model=self.model,
-            prompt=prompt,
-            config=types.GenerateImagesConfig(
-                number_of_images=1,
-                aspect_ratio="16:9",
-                output_mime_type="image/png",
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                response_modalities=["IMAGE"],
+                image_config=types.ImageConfig(aspect_ratio="16:9"),
             ),
         )
-        if not result.generated_images:
-            raise RuntimeError("Gemini Imagen returned no generated images.")
-
-        image_bytes = result.generated_images[0].image.image_bytes
+        image_bytes = _extract_image_bytes(response)
         output_png_path.parent.mkdir(parents=True, exist_ok=True)
         with Image.open(io.BytesIO(image_bytes)) as img:
             resized = img.convert("RGB").resize((width, height), Image.Resampling.LANCZOS)
             resized.save(output_png_path, format="PNG")
         return output_png_path
+
+
+def _extract_image_bytes(response) -> bytes:
+    """Extract inline image bytes from a Gemini IMAGE generate_content response."""
+    for candidate in getattr(response, "candidates", []) or []:
+        content = getattr(candidate, "content", None)
+        for part in getattr(content, "parts", []) or []:
+            inline = getattr(part, "inline_data", None)
+            if inline and getattr(inline, "data", None):
+                mime = (getattr(inline, "mime_type", "") or "").lower()
+                if not mime or mime.startswith("image/"):
+                    return inline.data
+    raise RuntimeError("Gemini image response contained no inline image data.")

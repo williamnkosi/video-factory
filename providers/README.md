@@ -9,5 +9,5 @@ Pluggable `TTSProvider` and `ImageProvider` adapters shared by `scripts/`.
   - `gemini.py` — Google GenAI native TTS (`gemini-2.5-flash-preview-tts`, uses `GEMINI_API_KEY`)
   - `mock.py` — Offline synthetic WAV generator for zero-cost testing
 - `image/`
-  - `gemini.py` — Google GenAI Imagen (`imagen-3.0-generate-002`, uses `GEMINI_API_KEY`)
+  - `gemini.py` — Google GenAI native image generation (`gemini-2.5-flash-image`, uses `GEMINI_API_KEY`)
   - `mock.py` — Offline 16:9 PNG generator via Pillow for zero-cost testing

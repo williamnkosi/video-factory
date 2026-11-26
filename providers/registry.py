@@ -52,7 +52,7 @@ def get_image_provider(
     if provider_name == "gemini":
         return GeminiImageProvider(
             api_key=os.getenv("GEMINI_API_KEY", ""),
-            model=model or os.getenv("VF_GEMINI_IMAGE_MODEL", "imagen-3.0-generate-002"),
+            model=model or os.getenv("VF_GEMINI_IMAGE_MODEL", "gemini-2.5-flash-image"),
         )
     if provider_name == "mock":
         return MockImageProvider()

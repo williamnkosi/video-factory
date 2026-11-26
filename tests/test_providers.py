@@ -38,11 +38,37 @@ def test_registry_rejects_unknown_provider():
 
 
 def test_gemini_requires_api_key(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr("providers.registry.load_dotenv", lambda *args, **kwargs: False)
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
     with pytest.raises(ValueError, match="GEMINI_API_KEY"):
         get_tts_provider("gemini")
     with pytest.raises(ValueError, match="GEMINI_API_KEY"):
         get_image_provider("gemini")
+
+
+def test_extract_image_bytes_from_generate_content():
+    from types import SimpleNamespace
+
+    from providers.image.gemini import _extract_image_bytes
+
+    fake_response = SimpleNamespace(
+        candidates=[
+            SimpleNamespace(
+                content=SimpleNamespace(
+                    parts=[
+                        SimpleNamespace(inline_data=None),
+                        SimpleNamespace(
+                            inline_data=SimpleNamespace(mime_type="image/png", data=b"PNGDATA")
+                        ),
+                    ]
+                )
+            )
+        ]
+    )
+    assert _extract_image_bytes(fake_response) == b"PNGDATA"
+
+    with pytest.raises(RuntimeError, match="no inline image data"):
+        _extract_image_bytes(SimpleNamespace(candidates=[]))
 
 
 def test_chunk_text_for_tts_respects_limit():

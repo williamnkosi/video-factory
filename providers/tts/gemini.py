@@ -24,8 +24,12 @@ class GeminiTTSProvider(TTSProvider):
                 "GEMINI_API_KEY is not set. Add it to your local .env or use '--provider mock'."
             )
         from google import genai
+        from google.genai import types
 
-        self.client = genai.Client(api_key=api_key)
+        self.client = genai.Client(
+            api_key=api_key,
+            http_options=types.HttpOptions(api_version="v1beta"),
+        )
         self.model = model
         self.default_voice = default_voice
 
